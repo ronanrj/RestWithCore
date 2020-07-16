@@ -9,9 +9,9 @@ namespace RestCore.Services.Implementations
     public interface IPersonService
     {
         Person Create(Person person);
-        Person FindId(long id);
+        Person FindId(int id);
         List<Person> FindAll();
         Person Update(Person person);
-        void Delete(long id);
+        void Delete(int id);
     }
 }
