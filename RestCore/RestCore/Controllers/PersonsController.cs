@@ -1,64 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RestCore.Model;
-using RestCore.Services.Implementations;
+using RestCore.Business;
+using RestCore.Data.Converters;
+using RestCore.Data.VO;
+using Tapioca.HATEOAS;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RestCore.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+
+    [ApiVersion("1.0")]
+    //[Route("api/[controller]/v{version:apiVersion}")] 
+    [Route("api/[controller]")]    
     public class PersonsController : ControllerBase
     {
         //declaração do serviço usado
-        private IPersonService _personService;
+        private IPersonBusiness _personBusiness;
+       
 
         //Injeção de uma instancia de IpersonService ao criar uma instancia de PersonController
-        public PersonsController(IPersonService personService)
+        public PersonsController(IPersonBusiness personBusiness)
         {
-            _personService = personService;
+            _personBusiness = personBusiness;
         }
 
 
         // GET api/values
         [HttpGet]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        [Authorize("Bearer")]
         public IActionResult Get()
         {
-            return Ok(_personService.FindAll());
+            return Ok(_personBusiness.FindAll());
         }
 
         // GET api/values/5
         [HttpGet("{id}")] //path paramams
+        [TypeFilter(typeof(HyperMediaFilter))]
+        [Authorize("Bearer")]
         public IActionResult Get(int id)
         {
-            var person = _personService.FindId(id);
+            var person = _personBusiness.FindId(id);
             if (person == null) return NotFound();
             return Ok(person);
         }
 
         // POST api/values
         [HttpPost]
-        public IActionResult Post([FromBody] Person person)
+        [TypeFilter(typeof(HyperMediaFilter))]
+        [Authorize("Bearer")]
+        public IActionResult Post([FromBody] PersonVO person)
         {            
             if (person == null) return NotFound();
-            return new ObjectResult(_personService.Create(person));
+            return new ObjectResult(_personBusiness.Create(person));
         }
 
         // PUT api/values/5
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Person person)
+        [HttpPut]
+        [TypeFilter(typeof(HyperMediaFilter))]
+        [Authorize("Bearer")]
+        public IActionResult Put(int id, [FromBody] PersonVO person)
         {
-            if (person == null) return NotFound();
-            return new ObjectResult(_personService.Update(person));
+            if (person == null) return BadRequest();
+            var updatedPerson = _personBusiness.Update(person);
+            if (updatedPerson == null) return BadRequest();
+            return new ObjectResult(updatedPerson);
         }
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
+        [Authorize("Bearer")]
+        [TypeFilter(typeof(HyperMediaFilter))]
         public IActionResult Delete(int id)
         {
-            _personService.Delete(id);
+            _personBusiness.Delete(id);
             return NoContent();
         }
     }
