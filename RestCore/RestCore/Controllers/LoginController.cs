@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestCore.Business;
+using RestCore.Data.VO;
 using RestCore.Model;
 
 namespace RestCore.Controllers
@@ -23,7 +24,7 @@ namespace RestCore.Controllers
 
         [HttpPost]
         [AllowAnonymous]        
-        public object Post([FromBody] User user)
+        public object Post([FromBody] UserVO user)
         {            
             if (user == null) return BadRequest();
             return new ObjectResult(_loginBusiness.FindByLogin(user));
